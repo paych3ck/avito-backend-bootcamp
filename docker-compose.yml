@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=avito_test_user
+      - DB_PASSWORD=avitouserpassword
+      - DB_NAME=avitobackendbootcamp
+      - TEST_DB_NAME=avitobackendbootcamptest
+      - DB_PORT=5432
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    restart: unless-stopped
+
+  db:
+    image: postgres:14-alpine
+    volumes:
+      - ./pg-init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_MULTIPLE_DATABASES: avitobackendbootcamp,avitobackendbootcamptest
+      POSTGRES_USER: avito_test_user
+      POSTGRES_PASSWORD: avitouserpassword
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - db
+    ports:
+      - "5555:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: unless-stopped
+
+volumes:
+  db_data:
